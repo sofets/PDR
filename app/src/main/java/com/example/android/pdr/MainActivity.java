@@ -15,6 +15,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import static android.R.id.list;
+import static android.hardware.Sensor.TYPE_ACCELEROMETER;
+import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 import static android.hardware.Sensor.TYPE_STEP_COUNTER;
 import static android.hardware.Sensor.TYPE_STEP_DETECTOR;
 
@@ -24,6 +26,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     SensorManager mSensorManager;
     Sensor mStepDetector;
     Sensor mStepCounter;
+    Sensor mAccelerometer;
+    Sensor mMagneticField;
 
     static final String COUNTED_STEPS = "counted steps";
     static final String DETECTED_STEPS = "detected steps";
@@ -32,11 +36,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     Boolean isSensorStepDetectorPresent = false;
     Boolean isSensorStepCounterPresent = false;
+    Boolean isSensorAccelerometerPresent = false;
+    Boolean isSensorMagneticFieldPresent = false;
+
+    Boolean lastAccelerometerSet = false;
+    Boolean lastMagnetometerSet = false;
+    Boolean isOrientationSet = false;
 
     int numberOfStepsDetected = 0;
     int numberOfStepsCounted = 0;
 
     int initialStepCounterValue = 0;
+
+    String orientation;
+
+    float [] lastAccelerometer = new float[3];
+    float [] lastMagnetometer = new float[3];
+
+    float [] mRotationMatrix = new float[9];
+    float [] mOrientationAngles = new float[3];
 
     //long[] stepTimeStamp;
 
@@ -70,9 +88,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             isSensorStepDetectorPresent = true;
         }
 
-
         //TextView detectedSteps = (TextView) findViewById(R.id.stepsDetectedTextView);
         //detectedSteps.setText("" + isSensorStepDetectorPresent);
+
+
+        if (mSensorManager.getDefaultSensor(TYPE_ACCELEROMETER) != null) {
+            mAccelerometer = mSensorManager.getDefaultSensor(TYPE_ACCELEROMETER);
+
+            isSensorAccelerometerPresent = true;
+        }
+
+        if (mSensorManager.getDefaultSensor(TYPE_MAGNETIC_FIELD) != null) {
+            mMagneticField = mSensorManager.getDefaultSensor(TYPE_MAGNETIC_FIELD);
+
+            isSensorMagneticFieldPresent = true;
+        }
 
     }
 
@@ -86,6 +116,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 stepTimeStamp.add(event.timestamp);
 
+                if (lastAccelerometerSet && lastMagnetometerSet)
+                {
+                    mSensorManager.getRotationMatrix(mRotationMatrix, null, lastAccelerometer, lastMagnetometer);
+                    mSensorManager.getOrientation(mRotationMatrix, mOrientationAngles);
+
+                    float azimuthInRadians = mOrientationAngles[0];
+                    float pitchInRadians = mOrientationAngles[1];
+                    float rollInRadians = mOrientationAngles[2];
+
+                    int azimuthInDegress = (int)(((azimuthInRadians * 180/(float)Math.PI) + 360) % 360);
+
+                    isOrientationSet = true;
+
+                    //orientation = Float.toString(azimuthInRadians);
+                    orientation = "" + azimuthInDegress;
+
+                }
+
                 TextView detectedSteps = (TextView) findViewById(R.id.stepsDetectedTextView);
                 detectedSteps.setText("" + numberOfStepsDetected);
 
@@ -98,6 +146,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 TextView view1 = new TextView(this);
                 view1.setText(stepTimeStamp.get(numberOfStepsDetected - 1).toString());
                 row.addView(view1, 1);
+
+                if (isOrientationSet)
+                {
+                    TextView view2 = new TextView(this);
+                    view2.setText(orientation);
+                    row.addView(view2, 2);
+
+                }
+
                 table.addView(row);
 
                 //TextView numberOfStepView = (TextView) findViewById(numberOfStepView);
@@ -121,6 +178,38 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 countedSteps.setText(String.valueOf(numberOfStepsCounted));
                 break;
 
+            case TYPE_ACCELEROMETER:
+
+                lastAccelerometerSet = true;
+
+                System.arraycopy(event.values, 0, lastAccelerometer, 0, event.values.length);
+
+                break;
+
+            case TYPE_MAGNETIC_FIELD:
+
+                lastMagnetometerSet = true;
+
+                System.arraycopy(event.values, 0, lastMagnetometer, 0, event.values.length);
+
+                if (lastAccelerometerSet && lastMagnetometerSet)
+                {
+                    mSensorManager.getRotationMatrix(mRotationMatrix, null, lastAccelerometer, lastMagnetometer);
+                    mSensorManager.getOrientation(mRotationMatrix, mOrientationAngles);
+
+                    float azimuthInRadians = mOrientationAngles[0];
+                    float pitchInRadians = mOrientationAngles[1];
+                    float rollInRadians = mOrientationAngles[2];
+
+                    int azimuthInDegress = ((int)(azimuthInRadians * 180/(float)Math.PI) + 360) % 360;
+
+                    TextView orientationView = (TextView) findViewById(R.id.orientationTextView);
+                    orientationView.setText(Float.toString(azimuthInDegress));
+
+                }
+
+                break;
+
         }
     }
 
@@ -140,6 +229,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (isSensorStepCounterPresent) {
             mSensorManager.unregisterListener(this, mStepCounter);
         }
+
+        if (isSensorAccelerometerPresent) {
+            mSensorManager.unregisterListener(this, mAccelerometer);
+        }
+
+        if (isSensorMagneticFieldPresent) {
+            mSensorManager.unregisterListener(this, mMagneticField);
+        }
     }
 
     @Override
@@ -153,6 +250,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (isSensorStepDetectorPresent) {
             mSensorManager.registerListener(this, mStepDetector,
                     SensorManager.SENSOR_DELAY_FASTEST);
+        }
+        if (isSensorAccelerometerPresent) {
+            mSensorManager.registerListener(this, mAccelerometer,
+                    SensorManager.SENSOR_DELAY_UI);
+        }
+        if (isSensorMagneticFieldPresent) {
+            mSensorManager.registerListener(this, mMagneticField,
+                    SensorManager.SENSOR_DELAY_UI);
         }
     }
 
