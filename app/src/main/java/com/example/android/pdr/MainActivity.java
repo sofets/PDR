@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import static android.R.id.list;
 import static android.hardware.Sensor.TYPE_ACCELEROMETER;
 import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
+import static android.hardware.Sensor.TYPE_ROTATION_VECTOR;
 import static android.hardware.Sensor.TYPE_STEP_COUNTER;
 import static android.hardware.Sensor.TYPE_STEP_DETECTOR;
 
@@ -28,16 +29,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     Sensor mStepCounter;
     Sensor mAccelerometer;
     Sensor mMagneticField;
+    Sensor mRotationVector;
 
     static final String COUNTED_STEPS = "counted steps";
     static final String DETECTED_STEPS = "detected steps";
     static final String INITIAL_COUNTED_STEPS = "initial detected steps";
+
+    static double stepLength = 0.7;
 
 
     Boolean isSensorStepDetectorPresent = false;
     Boolean isSensorStepCounterPresent = false;
     Boolean isSensorAccelerometerPresent = false;
     Boolean isSensorMagneticFieldPresent = false;
+    Boolean isSensorRotationVectorPresent = false;
 
     Boolean lastAccelerometerSet = false;
     Boolean lastMagnetometerSet = false;
@@ -46,7 +51,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     int numberOfStepsDetected = 0;
     int numberOfStepsCounted = 0;
 
+    int orientationInDegrees = 0;
+
     int initialStepCounterValue = 0;
+
+    double distance = 0;
 
     String orientation;
 
@@ -55,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     float [] mRotationMatrix = new float[9];
     float [] mOrientationAngles = new float[3];
+
+    float [] mRotationMatrixFromVector = new float[16];
 
     //long[] stepTimeStamp;
 
@@ -104,6 +115,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             isSensorMagneticFieldPresent = true;
         }
 
+        if (mSensorManager.getDefaultSensor(TYPE_ROTATION_VECTOR) != null) {
+            mRotationVector = mSensorManager.getDefaultSensor(TYPE_ROTATION_VECTOR);
+
+            isSensorRotationVectorPresent = true;
+        }
     }
 
     @Override
@@ -113,6 +129,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             case TYPE_STEP_DETECTOR:
 
                 numberOfStepsDetected++;
+
+                distance = distance + stepLength;
 
                 stepTimeStamp.add(event.timestamp);
 
@@ -137,6 +155,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 TextView detectedSteps = (TextView) findViewById(R.id.stepsDetectedTextView);
                 detectedSteps.setText("" + numberOfStepsDetected);
 
+                TextView distanceView = (TextView) findViewById(R.id.distanceTextView);
+                distanceView.setText(Double.toString(distance));
+
                 TableLayout table = (TableLayout) findViewById(R.id.tableLayoutView);
                 TableRow row = new TableRow(this);
                 TextView view = new TextView(this);
@@ -154,6 +175,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     row.addView(view2, 2);
 
                 }
+
+                TextView view3 = new TextView(this);
+                view3.setText("" + orientationInDegrees);
+                row.addView(view3, 3);
 
                 table.addView(row);
 
@@ -204,9 +229,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     int azimuthInDegress = ((int)(azimuthInRadians * 180/(float)Math.PI) + 360) % 360;
 
                     TextView orientationView = (TextView) findViewById(R.id.orientationTextView);
-                    orientationView.setText(Float.toString(azimuthInDegress));
+                    orientationView.setText("" + azimuthInDegress);
+
+                   // orientationView.setText(Float.toString(azimuthInDegress));
 
                 }
+
+                break;
+
+            case TYPE_ROTATION_VECTOR:
+
+                mSensorManager.getRotationMatrixFromVector(mRotationMatrix, event.values);
+                mSensorManager.getOrientation(mRotationMatrix, mOrientationAngles);
+
+
+                orientationInDegrees = ((int)(mOrientationAngles[0] * 180/(float)Math.PI) + 360) % 360;
+
+
+                //int azimuthInDegress = (int)Math.toDegrees(mOrientationAngles[0]);
+
+                TextView orientationView = (TextView) findViewById(R.id.rotationVectorTextView);
+                orientationView.setText("" + orientationInDegrees);
 
                 break;
 
@@ -237,6 +280,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (isSensorMagneticFieldPresent) {
             mSensorManager.unregisterListener(this, mMagneticField);
         }
+
+        if (isSensorRotationVectorPresent) {
+            mSensorManager.unregisterListener(this, mRotationVector);
+        }
     }
 
     @Override
@@ -257,6 +304,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         if (isSensorMagneticFieldPresent) {
             mSensorManager.registerListener(this, mMagneticField,
+                    SensorManager.SENSOR_DELAY_UI);
+        }
+        if (isSensorRotationVectorPresent) {
+            mSensorManager.registerListener(this, mRotationVector,
                     SensorManager.SENSOR_DELAY_UI);
         }
     }
