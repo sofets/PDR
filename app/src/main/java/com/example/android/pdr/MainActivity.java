@@ -5,17 +5,22 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.SystemClock;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import static android.R.attr.button;
 import static android.R.id.list;
 import static android.hardware.Sensor.TYPE_ACCELEROMETER;
+import static android.hardware.Sensor.TYPE_LINEAR_ACCELERATION;
 import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 import static android.hardware.Sensor.TYPE_ROTATION_VECTOR;
 import static android.hardware.Sensor.TYPE_STEP_COUNTER;
@@ -30,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     Sensor mAccelerometer;
     Sensor mMagneticField;
     Sensor mRotationVector;
+    Sensor mLinearAccelerometer;
 
     static final String COUNTED_STEPS = "counted steps";
     static final String DETECTED_STEPS = "detected steps";
@@ -43,10 +49,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     Boolean isSensorAccelerometerPresent = false;
     Boolean isSensorMagneticFieldPresent = false;
     Boolean isSensorRotationVectorPresent = false;
+    Boolean isSensorLinearAccelerationPresent = false;
 
     Boolean lastAccelerometerSet = false;
     Boolean lastMagnetometerSet = false;
     Boolean isOrientationSet = false;
+
+    Boolean stepCountingActive = false;
 
     int numberOfStepsDetected = 0;
     int numberOfStepsCounted = 0;
@@ -68,9 +77,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     float [] mRotationMatrixFromVector = new float[16];
 
     //long[] stepTimeStamp;
-
+    long timeCountingStarted = 0;
+    long timeOfStep;
 
     ArrayList<Long> stepTimeStamp = new ArrayList<Long>();
+
+
 
 
 
@@ -120,6 +132,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             isSensorRotationVectorPresent = true;
         }
+
+        if (mSensorManager.getDefaultSensor(TYPE_LINEAR_ACCELERATION) != null) {
+            mLinearAccelerometer = mSensorManager.getDefaultSensor(TYPE_LINEAR_ACCELERATION);
+
+            isSensorLinearAccelerationPresent = true;
+        }
     }
 
     @Override
@@ -128,79 +146,109 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         switch (event.sensor.getType()) {
             case TYPE_STEP_DETECTOR:
 
-                numberOfStepsDetected++;
+                if (stepCountingActive) {
 
-                distance = distance + stepLength;
+                    numberOfStepsDetected++;
 
-                stepTimeStamp.add(event.timestamp);
+                    distance = distance + stepLength;
 
-                if (lastAccelerometerSet && lastMagnetometerSet)
-                {
-                    mSensorManager.getRotationMatrix(mRotationMatrix, null, lastAccelerometer, lastMagnetometer);
-                    mSensorManager.getOrientation(mRotationMatrix, mOrientationAngles);
+                    stepTimeStamp.add(event.timestamp);
 
-                    float azimuthInRadians = mOrientationAngles[0];
-                    float pitchInRadians = mOrientationAngles[1];
-                    float rollInRadians = mOrientationAngles[2];
+                    if (numberOfStepsDetected == 1){
+                        timeOfStep = event.timestamp/1000000L - timeCountingStarted;
+                    }
+                    else {
+                        timeOfStep = (event.timestamp - stepTimeStamp.get((numberOfStepsDetected - 1) - 1))
+                                /1000000L;
+                    }
 
-                    int azimuthInDegress = (int)(((azimuthInRadians * 180/(float)Math.PI) + 360) % 360);
 
-                    isOrientationSet = true;
+                    if (lastAccelerometerSet && lastMagnetometerSet) {
+                        mSensorManager.getRotationMatrix(mRotationMatrix, null, lastAccelerometer, lastMagnetometer);
+                        mSensorManager.getOrientation(mRotationMatrix, mOrientationAngles);
 
-                    //orientation = Float.toString(azimuthInRadians);
-                    orientation = "" + azimuthInDegress;
+                        float azimuthInRadians = mOrientationAngles[0];
+                        float pitchInRadians = mOrientationAngles[1];
+                        float rollInRadians = mOrientationAngles[2];
 
+                        int azimuthInDegress = (int) (((azimuthInRadians * 180 / (float) Math.PI) + 360) % 360);
+
+                        isOrientationSet = true;
+
+                        //orientation = Float.toString(azimuthInRadians);
+                        orientation = "" + azimuthInDegress;
+
+                    }
+
+                    TextView detectedSteps = (TextView) findViewById(R.id.stepsDetectedTextView);
+                    detectedSteps.setText("" + numberOfStepsDetected);
+
+                    TextView distanceView = (TextView) findViewById(R.id.distanceTextView);
+                    distanceView.setText(Double.toString(distance));
+
+                    TableLayout table = (TableLayout) findViewById(R.id.tableLayoutView);
+                    TableRow row = new TableRow(this);
+                    TextView view = new TextView(this);
+                    view.setText("" + numberOfStepsDetected);
+                    row.addView(view, 0);
+
+                    TextView view1 = new TextView(this);
+                    view1.setText(Long.toString(timeOfStep));
+                    row.addView(view1, 1);
+
+                    if (isOrientationSet) {
+                        TextView view2 = new TextView(this);
+                        view2.setText(orientation);
+                        row.addView(view2, 2);
+
+                    }
+
+                    TextView view3 = new TextView(this);
+                    view3.setText("" + orientationInDegrees);
+                    row.addView(view3, 3);
+
+                    table.addView(row);
+
+                    //TextView numberOfStepView = (TextView) findViewById(numberOfStepView);
+                    //numberOfStepView.setText("" + numberOfStepsDetected);
+
+                    //TextView stepTimeStampView = (TextView) findViewById(R.id.stepTimeStampView);
+                    //stepTimeStampView.setText("" + event.timestamp);
+                    //stepTimeStampView.setText("" + stepTimeStamp.get(numberOfStepsDetected - 1));
                 }
 
-                TextView detectedSteps = (TextView) findViewById(R.id.stepsDetectedTextView);
-                detectedSteps.setText("" + numberOfStepsDetected);
-
-                TextView distanceView = (TextView) findViewById(R.id.distanceTextView);
-                distanceView.setText(Double.toString(distance));
-
-                TableLayout table = (TableLayout) findViewById(R.id.tableLayoutView);
-                TableRow row = new TableRow(this);
-                TextView view = new TextView(this);
-                view.setText("" + numberOfStepsDetected);
-                row.addView(view, 0);
-
-                TextView view1 = new TextView(this);
-                view1.setText(stepTimeStamp.get(numberOfStepsDetected - 1).toString());
-                row.addView(view1, 1);
-
-                if (isOrientationSet)
-                {
-                    TextView view2 = new TextView(this);
-                    view2.setText(orientation);
-                    row.addView(view2, 2);
-
-                }
-
-                TextView view3 = new TextView(this);
-                view3.setText("" + orientationInDegrees);
-                row.addView(view3, 3);
-
-                table.addView(row);
-
-                //TextView numberOfStepView = (TextView) findViewById(numberOfStepView);
-                //numberOfStepView.setText("" + numberOfStepsDetected);
-
-                //TextView stepTimeStampView = (TextView) findViewById(R.id.stepTimeStampView);
-                //stepTimeStampView.setText("" + event.timestamp);
-                //stepTimeStampView.setText("" + stepTimeStamp.get(numberOfStepsDetected - 1));
 
                 break;
 
             case TYPE_STEP_COUNTER:
 
-                if (initialStepCounterValue < 1) {
+
+                if (stepCountingActive) {
+
+                    if (initialStepCounterValue < 1) {
+                        initialStepCounterValue = (int) event.values[0];
+                    }
+
+                    numberOfStepsCounted = (int) event.values[0] - initialStepCounterValue;
+
+                    TextView countedSteps = (TextView) findViewById(R.id.countedStepsTextView);
+                    countedSteps.setText(String.valueOf(numberOfStepsCounted));
+
+                    TableLayout table = (TableLayout) findViewById(R.id.tableLayoutView);
+                    TableRow row = new TableRow(this);
+                    TextView view = new TextView(this);
+                    view.setText("" + numberOfStepsCounted);
+                    row.addView(view, 0);
+
+                    table.addView(row);
+
+
+                }
+                else {
                     initialStepCounterValue = (int) event.values[0];
+
                 }
 
-                numberOfStepsCounted = (int) event.values[0] - initialStepCounterValue;
-
-                TextView countedSteps = (TextView) findViewById(R.id.countedStepsTextView);
-                countedSteps.setText(String.valueOf(numberOfStepsCounted));
                 break;
 
             case TYPE_ACCELEROMETER:
@@ -208,6 +256,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 lastAccelerometerSet = true;
 
                 System.arraycopy(event.values, 0, lastAccelerometer, 0, event.values.length);
+
+                break;
+
+            case TYPE_LINEAR_ACCELERATION:
+
+                TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
+                accelerationX.setText(String.format("%.2f", event.values[0]));
+
+                TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
+                accelerationY.setText(String.format("%.2f", event.values[1]));
+
+                TextView accelerationZ = (TextView) findViewById(R.id.accelerometerZTextView);
+                accelerationZ.setText(String.format("%.2f", event.values[2]));
 
                 break;
 
@@ -239,8 +300,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             case TYPE_ROTATION_VECTOR:
 
-                mSensorManager.getRotationMatrixFromVector(mRotationMatrix, event.values);
-                mSensorManager.getOrientation(mRotationMatrix, mOrientationAngles);
+                mSensorManager.getRotationMatrixFromVector(mRotationMatrixFromVector, event.values);
+                mSensorManager.getOrientation(mRotationMatrixFromVector, mOrientationAngles);
 
 
                 orientationInDegrees = ((int)(mOrientationAngles[0] * 180/(float)Math.PI) + 360) % 360;
@@ -284,6 +345,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (isSensorRotationVectorPresent) {
             mSensorManager.unregisterListener(this, mRotationVector);
         }
+        if (isSensorLinearAccelerationPresent)
+        {
+            mSensorManager.unregisterListener(this, mLinearAccelerometer);
+        }
     }
 
     @Override
@@ -310,6 +375,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             mSensorManager.registerListener(this, mRotationVector,
                     SensorManager.SENSOR_DELAY_UI);
         }
+        if (isSensorLinearAccelerationPresent) {
+            mSensorManager.registerListener(this, mLinearAccelerometer,
+                    SensorManager.SENSOR_DELAY_UI);
+        }
     }
 
     @Override
@@ -333,4 +402,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         numberOfStepsCounted = savedInstanceState.getInt(COUNTED_STEPS);
         initialStepCounterValue = savedInstanceState.getInt(INITIAL_COUNTED_STEPS);
     }
+
+    public void startStop (View view){
+
+        Button myButton = (Button) findViewById(R.id.startStopButton);
+
+
+        if (stepCountingActive){
+
+            stepCountingActive = false;
+            timeCountingStarted = 0;
+            myButton.setText("START");
+        }
+        else {
+            stepCountingActive = true;
+            timeCountingStarted = SystemClock.elapsedRealtime();
+            myButton.setText("STOP");
+
+        }
+
+    }
+
+
 }
