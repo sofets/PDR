@@ -82,6 +82,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     ArrayList<Long> stepTimeStamp = new ArrayList<Long>();
 
+    double accelerationTotalMax = 0;
+    double accelerationTotalMin = 0;
+
+    double accelerationTotal = 0;
 
 
 
@@ -158,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         timeOfStep = event.timestamp/1000000L - timeCountingStarted;
                     }
                     else {
-                        timeOfStep = (event.timestamp - stepTimeStamp.get((numberOfStepsDetected - 1) - 1))
+                        timeOfStep = (event.timestamp - stepTimeStamp.get((stepTimeStamp.size() - 1) - 1))
                                 /1000000L;
                     }
 
@@ -196,18 +200,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     view1.setText(Long.toString(timeOfStep));
                     row.addView(view1, 1);
 
-                    if (isOrientationSet) {
-                        TextView view2 = new TextView(this);
-                        view2.setText(orientation);
-                        row.addView(view2, 2);
+                    //if (isOrientationSet) {
+                    //    TextView view2 = new TextView(this);
+                    //    view2.setText(orientation);
+                    //    row.addView(view2, 2);
 
-                    }
+                    //}
+                    TextView view2 = new TextView(this);
+                    view2.setText(String.format("%.2f", accelerationTotalMin));
+                    row.addView(view2, 2);
 
                     TextView view3 = new TextView(this);
-                    view3.setText("" + orientationInDegrees);
+                    //view3.setText("" + orientationInDegrees);
+
+                    //view3.setText("" + String.valueOf((int) accelerationTotalMin) +
+                    //        String.valueOf((int) accelerationTotalMax));
+                    view3.setText(String.format("%.2f", accelerationTotalMax));
+
                     row.addView(view3, 3);
 
                     table.addView(row);
+
+                    accelerationTotalMax = 0;
+                    accelerationTotalMin = 0;
 
                     //TextView numberOfStepView = (TextView) findViewById(numberOfStepView);
                     //numberOfStepView.setText("" + numberOfStepsDetected);
@@ -230,6 +245,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     }
 
                     numberOfStepsCounted = (int) event.values[0] - initialStepCounterValue;
+
+                    if (numberOfStepsCounted > numberOfStepsDetected) {
+
+                        distance = distance + (numberOfStepsCounted - numberOfStepsDetected) * stepLength;
+
+                        numberOfStepsDetected = numberOfStepsCounted;
+
+                        TextView detectedSteps = (TextView) findViewById(R.id.stepsDetectedTextView);
+                        detectedSteps.setText("" + numberOfStepsDetected);
+
+                        TextView distanceView = (TextView) findViewById(R.id.distanceTextView);
+                        distanceView.setText(Double.toString(distance));
+
+                    }
 
                     TextView countedSteps = (TextView) findViewById(R.id.countedStepsTextView);
                     countedSteps.setText(String.valueOf(numberOfStepsCounted));
@@ -257,19 +286,103 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 System.arraycopy(event.values, 0, lastAccelerometer, 0, event.values.length);
 
+                if (1 > 5) {
+
+                if (stepCountingActive && numberOfStepsDetected > 1){
+
+                    long timeElapsedFromLastStep
+                            = event.timestamp - stepTimeStamp.get(stepTimeStamp.size() - 1);
+
+
+                    if (event.timestamp/1000000L - stepTimeStamp.get(stepTimeStamp.size() - 1)/1000000L
+                            < 1500){
+
+                         accelerationTotal =
+                                Math.sqrt(Math.pow(event.values[0], 2) +
+                                        Math.pow(event.values[1], 2) +
+                                        Math.pow(event.values[2], 2));
+
+                        if (accelerationTotalMin == 0){
+                            accelerationTotalMin = accelerationTotal;
+                        }
+                        else if(accelerationTotal < accelerationTotalMin) {
+                            accelerationTotalMin = accelerationTotal;
+
+                        }
+                        if (accelerationTotalMax == 0){
+                            accelerationTotalMax = accelerationTotal;
+                        }
+                        else if (accelerationTotal > accelerationTotalMax){
+                            accelerationTotalMax = accelerationTotal;
+                        }
+                    }
+                    else{
+                        accelerationTotalMax = 0;
+                        accelerationTotalMin = 0;
+                    }
+
+                    TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
+                    accelerationX.setText(String.format("%.2f", accelerationTotal));
+
+                    //TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
+                    //accelerationY.setText(String.format("%.2f", event.values[1]));
+
+                }
+                }
+
                 break;
 
             case TYPE_LINEAR_ACCELERATION:
 
-                TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
-                accelerationX.setText(String.format("%.2f", event.values[0]));
+                //TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
+                //accelerationX.setText(String.format("%.2f", event.values[0]));
 
-                TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
-                accelerationY.setText(String.format("%.2f", event.values[1]));
+                //TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
+                //accelerationY.setText(String.format("%.2f", event.values[1]));
 
-                TextView accelerationZ = (TextView) findViewById(R.id.accelerometerZTextView);
-                accelerationZ.setText(String.format("%.2f", event.values[2]));
+                //TextView accelerationZ = (TextView) findViewById(R.id.accelerometerZTextView);
+                //accelerationZ.setText(String.format("%.2f", event.values[2]));
 
+                if (stepCountingActive && numberOfStepsDetected > 1){
+
+                    long timeElapsedFromLastStep
+                            = event.timestamp - stepTimeStamp.get(stepTimeStamp.size() - 1);
+
+
+                    if (event.timestamp/1000000L - stepTimeStamp.get(stepTimeStamp.size() - 1)/1000000L
+                            < 1500){
+
+                        accelerationTotal =
+                                Math.sqrt(Math.pow(event.values[0], 2) +
+                                        Math.pow(event.values[1], 2) +
+                                        Math.pow(event.values[2], 2));
+
+                        if (accelerationTotalMin == 0){
+                            accelerationTotalMin = accelerationTotal;
+                        }
+                        else if(accelerationTotal < accelerationTotalMin) {
+                            accelerationTotalMin = accelerationTotal;
+
+                        }
+                        if (accelerationTotalMax == 0){
+                            accelerationTotalMax = accelerationTotal;
+                        }
+                        else if (accelerationTotal > accelerationTotalMax){
+                            accelerationTotalMax = accelerationTotal;
+                        }
+                    }
+                    else{
+                        accelerationTotalMax = 0;
+                        accelerationTotalMin = 0;
+                    }
+
+                    TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
+                    accelerationX.setText(String.format("%.2f", accelerationTotal));
+
+                    //TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
+                    //accelerationY.setText(String.format("%.2f", event.values[1]));
+
+                }
                 break;
 
             case TYPE_MAGNETIC_FIELD:
@@ -420,6 +533,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             myButton.setText("STOP");
 
         }
+
+    }
+
+    public void reset (View view){
+        stepCountingActive = false;
+        timeCountingStarted = 0;
+        initialStepCounterValue = initialStepCounterValue + numberOfStepsCounted;
+        numberOfStepsCounted = 0;
+        numberOfStepsDetected = 0;
+        distance = 0;
+
+        TextView countedSteps = (TextView) findViewById(R.id.countedStepsTextView);
+        countedSteps.setText(String.valueOf(numberOfStepsCounted));
+
+        TextView detectedSteps = (TextView) findViewById(R.id.stepsDetectedTextView);
+        detectedSteps.setText("" + numberOfStepsDetected);
+
+        TextView distanceView = (TextView) findViewById(R.id.distanceTextView);
+        distanceView.setText(Double.toString(distance));
+
+        Button myButton = (Button) findViewById(R.id.startStopButton);
+        myButton.setText("START");
 
     }
 

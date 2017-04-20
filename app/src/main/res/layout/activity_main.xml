@@ -167,7 +167,7 @@
 
                 <TextView
                     android:layout_column="3"
-                    android:text="rotation vector" />
+                    android:text="acceleration" />
 
             </TableRow>
 
@@ -175,15 +175,28 @@
         </TableLayout>
     </ScrollView>
 
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
 
     <Button
         android:id="@+id/startStopButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:paddingBottom="10dp"
         android:onClick="startStop"
         android:text="START" />
+
+    <Button
+        android:id="@+id/ResetButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:onClick="reset"
+        android:text="RESET" />
+
+</LinearLayout>
 
 
 </LinearLayout>
