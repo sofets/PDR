@@ -91,15 +91,83 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
-            android:text="Distance" />
+            android:text="Distance (m) - L/H/F" />
 
         <TextView
             android:id="@+id/distanceTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0"
-            android:textSize="40sp" />
+            android:textSize="25sp" />
+        <TextView
+            android:id="@+id/distanceHeight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:text="0"
+            android:textSize="25sp" />
+        <TextView
+            android:id="@+id/distanceFreq"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:text="0"
+            android:textSize="25sp" />
 
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="30dp"
+            android:text="mean frequency - time" />
+
+        <TextView
+            android:id="@+id/meanFreq"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="30dp"
+            android:text="0"
+            android:textSize="25sp" />
+        <!--<TextView-->
+            <!--android:id="@+id/meanTime"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginRight="30dp"-->
+            <!--android:text="0"-->
+            <!--android:textSize="25sp" />-->
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textAccView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="30dp"
+            android:text="mean acceleration diff." />
+
+        <TextView
+            android:id="@+id/meanAccdiff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="30dp"
+            android:text="0"
+            android:textSize="25sp" />
 
     </LinearLayout>
 
@@ -113,28 +181,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="30dp"
-            android:text="Acceleration" />
+            android:text="total Walking Timee (ms)" />
 
         <TextView
-            android:id="@+id/accelerometerXTextView"
+            android:id="@+id/totalTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="30dp"
             android:text="0"
             android:textSize="25sp" />
-        <TextView
-            android:id="@+id/accelerometerYTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="30dp"
-            android:text="0"
-            android:textSize="25sp" />
-        <TextView
-            android:id="@+id/accelerometerZTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0"
-            android:textSize="25sp" />
+
 
 
     </LinearLayout>
@@ -159,15 +215,15 @@
 
                 <TextView
                     android:layout_column="1"
-                    android:text="time" />
+                    android:text="freq/time" />
 
                 <TextView
                     android:layout_column="2"
-                    android:text="Step Orientation" />
+                    android:text="acc idf" />
 
                 <TextView
                     android:layout_column="3"
-                    android:text="acceleration" />
+                    android:text="acc MAX" />
 
             </TableRow>
 
