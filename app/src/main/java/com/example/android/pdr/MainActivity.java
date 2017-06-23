@@ -18,6 +18,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import static android.R.attr.button;
+import static android.R.attr.x;
 import static android.R.id.list;
 import static android.hardware.Sensor.TYPE_ACCELEROMETER;
 import static android.hardware.Sensor.TYPE_LINEAR_ACCELERATION;
@@ -25,6 +26,7 @@ import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 import static android.hardware.Sensor.TYPE_ROTATION_VECTOR;
 import static android.hardware.Sensor.TYPE_STEP_COUNTER;
 import static android.hardware.Sensor.TYPE_STEP_DETECTOR;
+import static android.os.Build.VERSION_CODES.M;
 import static com.example.android.pdr.R.id.meanFreq;
 
 
@@ -42,8 +44,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     static final String DETECTED_STEPS = "detected steps";
     static final String INITIAL_COUNTED_STEPS = "initial detected steps";
 
-    static double stepLength = 75;
+    static double stepLengthConstant = 75;
     static double stepLengthHeight = 82;
+    double stepLength;
 
 
     Boolean isSensorStepDetectorPresent = false;
@@ -79,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     float [] mRotationMatrix = new float[9];
     float [] mOrientationAngles = new float[3];
+
+    double meanOrientationAngles = 0;
+    long counter = 0;
 
     float [] mRotationMatrixFromVector = new float[16];
 
@@ -168,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     numberOfStepsDetected++;
                     detectedStepsSensorValue++;
 
-                    distance = distance + stepLength;
+                    distance = distance + stepLengthConstant;
                     distanceHeight = distanceHeight + stepLengthHeight;
 
                     stepTimeStamp.add(event.timestamp);
@@ -182,10 +188,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         timeOfStep = (event.timestamp - stepTimeStamp.get((stepTimeStamp.size() - 1) - 1))
                                 /1000000L;
 
-                        totalTime = totalTime + timeOfStep;
-                        stepFrequency = 1000D / (double) timeOfStep;
+                        if (timeOfStep > 1000 ){
+                            counter = 0;
+                            meanOrientationAngles = 0;
+                        }
 
-                        distanceFrequency += 44.58 * stepFrequency + 3.25;
+                        totalTime = totalTime + timeOfStep;
+                        stepFrequency = 1000D / timeOfStep;
+
+                        stepLength = 44 * stepFrequency + 4.4;
+
+                        distanceFrequency = distanceFrequency + stepLength;
 
                         stepMeanFrequency = (detectedStepsSensorValue - 1)* 1000D / totalTime;
                         stepMeanTime = totalTime / (detectedStepsSensorValue -  1);
@@ -214,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     }
 
                     TextView detectedSteps = (TextView) findViewById(R.id.stepsDetectedTextView);
-                    detectedSteps.setText("" + numberOfStepsDetected);
+                    detectedSteps.setText("" + detectedStepsSensorValue);
 
                     TextView distanceView = (TextView) findViewById(R.id.distanceTextView);
                     distanceView.setText(Double.toString(distance/100D));
@@ -223,19 +236,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     distanceHeightView.setText(Double.toString(distanceHeight/100D));
 
                     TextView distanceFrequencyView = (TextView) findViewById(R.id.distanceFreq);
-                    distanceFrequencyView.setText(String.format("0,2f",Double.toString(distanceFrequency/100D)));
+                    distanceFrequencyView.setText(String.format("%.2f",distanceFrequency/100D));
 
                     TextView TotalTimeView = (TextView) findViewById(R.id.totalTime);
                     TotalTimeView.setText(Long.toString(totalTime));
 
                     TextView meanFreqView = (TextView) findViewById(R.id.meanFreq);
-                    meanFreqView.setText(Double.toString(stepMeanFrequency));
+                    meanFreqView.setText(String.format("%.5f",stepMeanFrequency));
 
                     TextView meanAccqView = (TextView) findViewById(R.id.meanAccdiff);
-                    meanAccqView.setText(Double.toString(stepMeanAccDiff));
-
-                    //TextView meanTimeView = (TextView) findViewById(R.id.meanTime);
-                    //meanTimeView.setText(Double.toString(stepMeanTime));
+                    meanAccqView.setText(String.format("%.5f",stepMeanAccDiff));
 
                     TableLayout table = (TableLayout) findViewById(R.id.tableLayoutView);
                     TableRow row = new TableRow(this);
@@ -247,31 +257,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     view1.setText(String.format("%.2f", stepFrequency));
                     row.addView(view1, 1);
 
-                    //if (isOrientationSet) {
-                    //    TextView view2 = new TextView(this);
-                    //    view2.setText(orientation);
-                    //    row.addView(view2, 2);
-
-                    //}
-
-
                     TextView view2 = new TextView(this);
-                    view2.setText(String.format("%.3f", Math.sqrt(accelerationTotalMax - accelerationTotalMin)));
+                    view2.setText(String.format("%.3f", stepLength/100D));
                     row.addView(view2, 2);
 
                     TextView view3 = new TextView(this);
-                    //view3.setText("" + orientationInDegrees);
-
-                    //view3.setText("" + String.valueOf((int) accelerationTotalMin) +
-                    //        String.valueOf((int) accelerationTotalMax));
                     view3.setText(String.format("%.3f", accelerationTotalMax));
-
                     row.addView(view3, 3);
+
+                    TextView view4 = new TextView(this);
+                    view4.setText(Integer.toString(orientationInDegrees));
+                    row.addView(view4, 4);
+
+                    if (counter > 0){
+
+                        TextView view5 = new TextView(this);
+                        view5.setText(Integer.toString(((int)Math.toDegrees(meanOrientationAngles/counter) +360) % 360));
+                        row.addView(view5, 5);
+                    }
+
 
                     table.addView(row);
 
                     accelerationTotalMax = 0;
                     accelerationTotalMin = 0;
+                    counter = 0;
+                    meanOrientationAngles = 0;
 
                     //TextView numberOfStepView = (TextView) findViewById(numberOfStepView);
                     //numberOfStepView.setText("" + numberOfStepsDetected);
@@ -297,19 +308,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                     if (numberOfStepsCounted > numberOfStepsDetected) {
 
-                        distance = distance + (numberOfStepsCounted - numberOfStepsDetected) * stepLength;
+                        distance = distance + (numberOfStepsCounted - numberOfStepsDetected) * stepLengthConstant;
                         distanceHeight = distanceHeight + (numberOfStepsCounted - numberOfStepsDetected) * stepLengthHeight;
 
-                        if (numberOfStepsDetected > 0){
-                            distanceFrequency += (numberOfStepsCounted - numberOfStepsDetected) * (44.58 * stepFrequency + 3.25);
+                        if (stepFrequency > 0){
+                            distanceFrequency += (numberOfStepsCounted - numberOfStepsDetected) * (stepLength);
                         }else {
                             distanceFrequency += (numberOfStepsCounted - numberOfStepsDetected) * stepLengthHeight;
                         }
 
                         numberOfStepsDetected = numberOfStepsCounted;
 
-                        TextView detectedSteps = (TextView) findViewById(R.id.stepsDetectedTextView);
-                        detectedSteps.setText("" + numberOfStepsDetected);
+                        //TextView detectedSteps = (TextView) findViewById(R.id.stepsDetectedTextView);
+                        //detectedSteps.setText("" + numberOfStepsDetected);
 
                         TextView distanceView = (TextView) findViewById(R.id.distanceTextView);
                         distanceView.setText(Double.toString(distance/100D));
@@ -318,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         distanceHeightView.setText(Double.toString(distanceHeight/100D));
 
                         TextView distanceFrequencyView = (TextView) findViewById(R.id.distanceFreq);
-                        distanceFrequencyView.setText(Double.toString(distanceFrequency/100D));
+                        distanceFrequencyView.setText(String.format("%.2f",distanceFrequency/100D));
 
                     }
 
@@ -348,9 +359,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 System.arraycopy(event.values, 0, lastAccelerometer, 0, event.values.length);
 
-                if (1 > 5) {
 
-                if (stepCountingActive && numberOfStepsDetected > 1){
+                if (stepCountingActive && numberOfStepsDetected > 0){
 
                     long timeElapsedFromLastStep
                             = event.timestamp - stepTimeStamp.get(stepTimeStamp.size() - 1);
@@ -360,61 +370,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             < 1500){
 
                          accelerationTotal =
-                                Math.sqrt(Math.pow(event.values[0], 2) +
-                                        Math.pow(event.values[1], 2) +
-                                        Math.pow(event.values[2], 2));
-
-                        if (accelerationTotalMin == 0){
-                            accelerationTotalMin = accelerationTotal;
-                        }
-                        else if(accelerationTotal < accelerationTotalMin) {
-                            accelerationTotalMin = accelerationTotal;
-
-                        }
-                        if (accelerationTotalMax == 0){
-                            accelerationTotalMax = accelerationTotal;
-                        }
-                        else if (accelerationTotal > accelerationTotalMax){
-                            accelerationTotalMax = accelerationTotal;
-                        }
-                    }
-                    else{
-                     //   accelerationTotalMax = 0;
-                     //   accelerationTotalMin = 0;
-                    }
-
-                    //TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
-                    //accelerationX.setText(String.format("%.2f", accelerationTotal));
-
-                    //TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
-                    //accelerationY.setText(String.format("%.2f", event.values[1]));
-
-                }
-                }
-
-                break;
-
-            case TYPE_LINEAR_ACCELERATION:
-
-                //TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
-                //accelerationX.setText(String.format("%.2f", event.values[0]));
-
-                //TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
-                //accelerationY.setText(String.format("%.2f", event.values[1]));
-
-                //TextView accelerationZ = (TextView) findViewById(R.id.accelerometerZTextView);
-                //accelerationZ.setText(String.format("%.2f", event.values[2]));
-
-                if (stepCountingActive && numberOfStepsDetected > 1){
-
-                    long timeElapsedFromLastStep
-                            = event.timestamp - stepTimeStamp.get(stepTimeStamp.size() - 1);
-
-
-                    if (event.timestamp/1000000L - stepTimeStamp.get(stepTimeStamp.size() - 1)/1000000L
-                            < 2000){
-
-                        accelerationTotal =
                                 Math.sqrt(Math.pow(event.values[0], 2) +
                                         Math.pow(event.values[1], 2) +
                                         Math.pow(event.values[2], 2));
@@ -445,6 +400,63 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     //accelerationY.setText(String.format("%.2f", event.values[1]));
 
                 }
+
+                break;
+
+            case TYPE_LINEAR_ACCELERATION:
+
+                if (1 > 5) {
+
+
+                    //TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
+                    //accelerationX.setText(String.format("%.2f", event.values[0]));
+
+                    //TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
+                    //accelerationY.setText(String.format("%.2f", event.values[1]));
+
+                    //TextView accelerationZ = (TextView) findViewById(R.id.accelerometerZTextView);
+                    //accelerationZ.setText(String.format("%.2f", event.values[2]));
+
+                    if (stepCountingActive && numberOfStepsDetected > 1) {
+
+                        long timeElapsedFromLastStep
+                                = event.timestamp - stepTimeStamp.get(stepTimeStamp.size() - 1);
+
+
+                        if (event.timestamp / 1000000L - stepTimeStamp.get(stepTimeStamp.size() - 1) / 1000000L
+                                < 2000) {
+
+                            accelerationTotal =
+                                    Math.sqrt(Math.pow(event.values[0], 2) +
+                                            Math.pow(event.values[1], 2) +
+                                            Math.pow(event.values[2], 2));
+
+                            if (accelerationTotalMin == 0) {
+                                accelerationTotalMin = accelerationTotal;
+                            } else if (accelerationTotal < accelerationTotalMin) {
+                                accelerationTotalMin = accelerationTotal;
+
+                            }
+                            if (accelerationTotalMax == 0) {
+                                accelerationTotalMax = accelerationTotal;
+                            } else if (accelerationTotal > accelerationTotalMax) {
+                                accelerationTotalMax = accelerationTotal;
+                            }
+                        } else {
+                            accelerationTotalMax = 0;
+                            accelerationTotalMin = 0;
+                        }
+
+                        //TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
+                        //accelerationX.setText(String.format("%.2f", accelerationTotal));
+
+                        //TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
+                        //accelerationY.setText(String.format("%.2f", event.values[1]));
+
+                    }
+
+                }
+
                 break;
 
             case TYPE_MAGNETIC_FIELD:
@@ -475,17 +487,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             case TYPE_ROTATION_VECTOR:
 
-                mSensorManager.getRotationMatrixFromVector(mRotationMatrixFromVector, event.values);
-                mSensorManager.getOrientation(mRotationMatrixFromVector, mOrientationAngles);
+                SensorManager.getRotationMatrixFromVector(mRotationMatrixFromVector, event.values);
+                SensorManager.getOrientation(mRotationMatrixFromVector, mOrientationAngles);
 
 
                 orientationInDegrees = ((int)(mOrientationAngles[0] * 180/(float)Math.PI) + 360) % 360;
 
 
+                if (detectedStepsSensorValue > 0){
+                    meanOrientationAngles += mOrientationAngles[0];
+                    counter ++;
+                }
+
                 //int azimuthInDegress = (int)Math.toDegrees(mOrientationAngles[0]);
 
                 TextView orientationView = (TextView) findViewById(R.id.rotationVectorTextView);
                 orientationView.setText("" + orientationInDegrees);
+
+                TextView rotVectAccuracy = (TextView) findViewById(R.id.rotationVectorAccView);
+                rotVectAccuracy.setText("" + event.values[4]);
+                //rotVectAccuracy.setText("" + counter);
 
                 break;
 
