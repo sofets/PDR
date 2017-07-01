@@ -84,6 +84,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     float [] mOrientationAngles = new float[3];
 
     double meanOrientationAngles = 0;
+    double sumSinAngles = 0;
+    double sumCosAngles = 0;
     long counter = 0;
 
     float [] mRotationMatrixFromVector = new float[16];
@@ -191,6 +193,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         if (timeOfStep > 1000 ){
                             counter = 0;
                             meanOrientationAngles = 0;
+                            sumCosAngles = 0;
+                            sumSinAngles = 0;
                         }
 
                         totalTime = totalTime + timeOfStep;
@@ -272,7 +276,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     if (counter > 0){
 
                         TextView view5 = new TextView(this);
-                        view5.setText(Integer.toString(((int)Math.toDegrees(meanOrientationAngles/counter) +360) % 360));
+                        //view5.setText(Integer.toString(((int)Math.toDegrees(meanOrientationAngles/counter) +360) % 360));
+                        view5.setText(Integer.toString(((int)Math.toDegrees(Math.atan2(sumSinAngles, sumCosAngles)) +360) % 360));
+
                         row.addView(view5, 5);
                     }
 
@@ -283,6 +289,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     accelerationTotalMin = 0;
                     counter = 0;
                     meanOrientationAngles = 0;
+                    sumCosAngles = 0;
+                    sumSinAngles = 0;
 
                     //TextView numberOfStepView = (TextView) findViewById(numberOfStepView);
                     //numberOfStepView.setText("" + numberOfStepsDetected);
@@ -495,6 +503,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
                 if (detectedStepsSensorValue > 0){
+                    sumCosAngles += Math.cos(mOrientationAngles[0]);
+                    sumSinAngles += Math.sin(mOrientationAngles[0]);
                     meanOrientationAngles += mOrientationAngles[0];
                     counter ++;
                 }

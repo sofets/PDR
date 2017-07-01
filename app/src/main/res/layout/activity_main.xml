@@ -9,250 +9,301 @@
     android:orientation="vertical"
     tools:context="com.example.android.pdr.MainActivity">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
-            android:text="Step Counter" />
-
-        <TextView
-            android:id="@+id/countedStepsTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0"
-            android:textSize="40sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:text="Orientation" />
-
-        <TextView
-            android:id="@+id/orientationTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0"
-            android:textSize="40sp" />
-
-
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
-            android:text="Step Detector" />
-
-        <TextView
-            android:id="@+id/stepsDetectedTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0"
-            android:textSize="40sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:text="rotation vector" />
-
-        <TextView
-            android:id="@+id/rotationVectorTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0"
-            android:textSize="40sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
-            android:text="Distance (m) - L/H/F" />
-
-        <TextView
-            android:id="@+id/distanceTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0"
-            android:textSize="25sp" />
-        <TextView
-            android:id="@+id/distanceHeight"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="30dp"
-            android:text="0"
-            android:textSize="25sp" />
-        <TextView
-            android:id="@+id/distanceFreq"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="30dp"
-            android:text="0"
-            android:textSize="25sp" />
-
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="30dp"
-            android:text="mean frequency - time" />
-
-        <TextView
-            android:id="@+id/meanFreq"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="30dp"
-            android:text="0"
-            android:textSize="25sp" />
-        <!--<TextView-->
-            <!--android:id="@+id/meanTime"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginRight="30dp"-->
-            <!--android:text="0"-->
-            <!--android:textSize="25sp" />-->
-
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/textAccView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="30dp"
-            android:text="mean acceleration diff." />
-
-        <TextView
-            android:id="@+id/meanAccdiff"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="30dp"
-            android:text="0"
-            android:textSize="25sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="30dp"
-            android:text="total Walking Timee (ms)" />
-
-        <TextView
-            android:id="@+id/totalTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="30dp"
-            android:text="0"
-            android:textSize="25sp" />
-
-
-
-    </LinearLayout>
-
-
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_height="match_parent">
 
-        <TableLayout
-            android:id="@+id/tableLayoutView"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="20dp"
+                android:text="Steps" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    android:text="Counted" />
+
+                <TextView
+                    android:id="@+id/countedStepsTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="30sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:text="Detected" />
+
+                <TextView
+                    android:id="@+id/stepsDetectedTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="30sp" />
+
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="20dp"
+                android:text="Orientation" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    android:text="Magn. field" />
+
+                <TextView
+                    android:id="@+id/orientationTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="30sp" />
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:text="rotation vec." />
+
+                <TextView
+                    android:id="@+id/rotationVectorTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="30sp" />
+
+
+            </LinearLayout>
+
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:stretchColumns="0,1,2,3">
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal">
 
-            <TableRow>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="20dp"
+                android:text="Rotation vector accuracy" />
+
+            <TextView
+                android:id="@+id/rotationVectorAccView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="20dp"
+                android:text="Distance (m)" />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:layout_column="0"
-                    android:text="step" />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    android:text="L/H/F" />
 
                 <TextView
-                    android:layout_column="1"
-                    android:text="freq/time" />
+                    android:id="@+id/distanceTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="20sp" />
 
                 <TextView
-                    android:layout_column="2"
-                    android:text="acc idf" />
+                    android:id="@+id/distanceHeight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="0"
+                    android:textSize="20sp" />
 
                 <TextView
-                    android:layout_column="3"
-                    android:text="acc MAX" />
+                    android:id="@+id/distanceFreq"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="0"
+                    android:textSize="20sp" />
 
-            </TableRow>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="30dp"
+                    android:text="mean frequency" />
+
+                <TextView
+                    android:id="@+id/meanFreq"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="30dp"
+                    android:text="0"
+                    android:textSize="20sp" />
 
 
-        </TableLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textAccView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="30dp"
+                    android:text="mean acceleration diff." />
+
+                <TextView
+                    android:id="@+id/meanAccdiff"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="30dp"
+                    android:text="0"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="30dp"
+                    android:text="total Walking Timee (ms)" />
+
+                <TextView
+                    android:id="@+id/totalTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="30dp"
+                    android:text="0"
+                    android:textSize="20sp" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+
+                <Button
+                    android:id="@+id/startStopButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="startStop"
+                    android:paddingBottom="10dp"
+                    android:text="START" />
+
+                <Button
+                    android:id="@+id/ResetButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="reset"
+                    android:paddingBottom="10dp"
+                    android:text="RESET" />
+
+            </LinearLayout>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <TableLayout
+                    android:id="@+id/tableLayoutView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:stretchColumns="0,1,2,3,4,5">
+
+                    <TableRow>
+
+                        <TextView
+                            android:layout_column="0"
+                            android:text="#" />
+
+                        <TextView
+                            android:layout_column="1"
+                            android:text="freq." />
+
+                        <TextView
+                            android:layout_column="2"
+                            android:text="length" />
+
+                        <TextView
+                            android:layout_column="3"
+                            android:text="Acc MAX" />
+
+                        <TextView
+                            android:layout_column="4"
+                            android:text="Orient" />
+                        <TextView
+                            android:layout_column="5"
+                            android:text="Mean Or." />
+
+                    </TableRow>
+
+                </TableLayout>
+            </ScrollView>
+
+
+        </LinearLayout>
+
     </ScrollView>
-
-<LinearLayout
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-
-
-    <Button
-        android:id="@+id/startStopButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="10dp"
-        android:onClick="startStop"
-        android:text="START" />
-
-    <Button
-        android:id="@+id/ResetButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="10dp"
-        android:onClick="reset"
-        android:text="RESET" />
-
-</LinearLayout>
-
 
 </LinearLayout>
