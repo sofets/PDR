@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     double accelerationTotal = 0;
 
     static final float ALPHA = 0.25f;
+    // test
 
 
     @Override
