@@ -21,9 +21,10 @@ import static android.R.attr.button;
 import static android.R.attr.x;
 import static android.R.id.list;
 import static android.hardware.Sensor.TYPE_ACCELEROMETER;
-import static android.hardware.Sensor.TYPE_LINEAR_ACCELERATION;
+
 import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 import static android.hardware.Sensor.TYPE_ROTATION_VECTOR;
+
 import static android.hardware.Sensor.TYPE_STEP_COUNTER;
 import static android.hardware.Sensor.TYPE_STEP_DETECTOR;
 import static android.os.Build.VERSION_CODES.M;
@@ -108,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     double accelerationTotal = 0;
 
-
+    static final float ALPHA = 0.25f;
 
 
     @Override
@@ -118,17 +119,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-
-        if (mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null) {
-            mStepCounter = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-
-            isSensorStepCounterPresent = true;
-        }
-
-
-        //TextView countedSteps = (TextView) findViewById(R.id.countedStepsTextView);
-        //countedSteps.setText("" + isSensorStepCounterPresent);
-
 
         if (mSensorManager.getDefaultSensor(TYPE_STEP_DETECTOR) != null) {
             mStepDetector = mSensorManager.getDefaultSensor(TYPE_STEP_DETECTOR);
@@ -158,11 +148,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             isSensorRotationVectorPresent = true;
         }
 
-        if (mSensorManager.getDefaultSensor(TYPE_LINEAR_ACCELERATION) != null) {
-            mLinearAccelerometer = mSensorManager.getDefaultSensor(TYPE_LINEAR_ACCELERATION);
+        if (mSensorManager.getDefaultSensor(TYPE_STEP_COUNTER) != null) {
+            mStepCounter = mSensorManager.getDefaultSensor(TYPE_STEP_COUNTER);
 
-            isSensorLinearAccelerationPresent = true;
+            isSensorStepCounterPresent = true;
         }
+
     }
 
     @Override
@@ -411,67 +402,69 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 break;
 
-            case TYPE_LINEAR_ACCELERATION:
-
-                if (1 > 5) {
-
-
-                    //TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
-                    //accelerationX.setText(String.format("%.2f", event.values[0]));
-
-                    //TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
-                    //accelerationY.setText(String.format("%.2f", event.values[1]));
-
-                    //TextView accelerationZ = (TextView) findViewById(R.id.accelerometerZTextView);
-                    //accelerationZ.setText(String.format("%.2f", event.values[2]));
-
-                    if (stepCountingActive && numberOfStepsDetected > 1) {
-
-                        long timeElapsedFromLastStep
-                                = event.timestamp - stepTimeStamp.get(stepTimeStamp.size() - 1);
-
-
-                        if (event.timestamp / 1000000L - stepTimeStamp.get(stepTimeStamp.size() - 1) / 1000000L
-                                < 2000) {
-
-                            accelerationTotal =
-                                    Math.sqrt(Math.pow(event.values[0], 2) +
-                                            Math.pow(event.values[1], 2) +
-                                            Math.pow(event.values[2], 2));
-
-                            if (accelerationTotalMin == 0) {
-                                accelerationTotalMin = accelerationTotal;
-                            } else if (accelerationTotal < accelerationTotalMin) {
-                                accelerationTotalMin = accelerationTotal;
-
-                            }
-                            if (accelerationTotalMax == 0) {
-                                accelerationTotalMax = accelerationTotal;
-                            } else if (accelerationTotal > accelerationTotalMax) {
-                                accelerationTotalMax = accelerationTotal;
-                            }
-                        } else {
-                            accelerationTotalMax = 0;
-                            accelerationTotalMin = 0;
-                        }
-
-                        //TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
-                        //accelerationX.setText(String.format("%.2f", accelerationTotal));
-
-                        //TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
-                        //accelerationY.setText(String.format("%.2f", event.values[1]));
-
-                    }
-
-                }
-
-                break;
+//            case TYPE_LINEAR_ACCELERATION:
+//
+//                if (1 > 5) {
+//
+//
+//                    //TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
+//                    //accelerationX.setText(String.format("%.2f", event.values[0]));
+//
+//                    //TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
+//                    //accelerationY.setText(String.format("%.2f", event.values[1]));
+//
+//                    //TextView accelerationZ = (TextView) findViewById(R.id.accelerometerZTextView);
+//                    //accelerationZ.setText(String.format("%.2f", event.values[2]));
+//
+//                    if (stepCountingActive && numberOfStepsDetected > 1) {
+//
+//                        long timeElapsedFromLastStep
+//                                = event.timestamp - stepTimeStamp.get(stepTimeStamp.size() - 1);
+//
+//
+//                        if (event.timestamp / 1000000L - stepTimeStamp.get(stepTimeStamp.size() - 1) / 1000000L
+//                                < 2000) {
+//
+//                            accelerationTotal =
+//                                    Math.sqrt(Math.pow(event.values[0], 2) +
+//                                            Math.pow(event.values[1], 2) +
+//                                            Math.pow(event.values[2], 2));
+//
+//                            if (accelerationTotalMin == 0) {
+//                                accelerationTotalMin = accelerationTotal;
+//                            } else if (accelerationTotal < accelerationTotalMin) {
+//                                accelerationTotalMin = accelerationTotal;
+//
+//                            }
+//                            if (accelerationTotalMax == 0) {
+//                                accelerationTotalMax = accelerationTotal;
+//                            } else if (accelerationTotal > accelerationTotalMax) {
+//                                accelerationTotalMax = accelerationTotal;
+//                            }
+//                        } else {
+//                            accelerationTotalMax = 0;
+//                            accelerationTotalMin = 0;
+//                        }
+//
+//                        //TextView accelerationX = (TextView) findViewById(R.id.accelerometerXTextView);
+//                        //accelerationX.setText(String.format("%.2f", accelerationTotal));
+//
+//                        //TextView accelerationY = (TextView) findViewById(R.id.accelerometerYTextView);
+//                        //accelerationY.setText(String.format("%.2f", event.values[1]));
+//
+//                    }
+//
+//                }
+//
+//                break;
 
             case TYPE_MAGNETIC_FIELD:
 
                 lastMagnetometerSet = true;
 
                 System.arraycopy(event.values, 0, lastMagnetometer, 0, event.values.length);
+
+                lastMagnetometer = lowPass(event.values.clone(), lastMagnetometer);
 
                 if (lastAccelerometerSet && lastMagnetometerSet)
                 {
@@ -524,6 +517,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
 
+    protected float[] lowPass( float[] input, float[] output ) {
+        if ( output == null ) return input;
+
+        for ( int i=0; i<input.length; i++ ) {
+            output[i] = output[i] + ALPHA * (input[i] - output[i]);
+        }
+        return output;
+    }
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
@@ -532,39 +534,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onStop() {
         super.onStop();
-        if (isSensorStepDetectorPresent) {
-            mSensorManager.unregisterListener(this, mStepDetector);
-        }
 
-        if (isSensorStepCounterPresent) {
-            mSensorManager.unregisterListener(this, mStepCounter);
-        }
+        mSensorManager.unregisterListener(this);
 
-        if (isSensorAccelerometerPresent) {
-            mSensorManager.unregisterListener(this, mAccelerometer);
-        }
-
-        if (isSensorMagneticFieldPresent) {
-            mSensorManager.unregisterListener(this, mMagneticField);
-        }
-
-        if (isSensorRotationVectorPresent) {
-            mSensorManager.unregisterListener(this, mRotationVector);
-        }
-        if (isSensorLinearAccelerationPresent)
-        {
-            mSensorManager.unregisterListener(this, mLinearAccelerometer);
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        if (isSensorStepCounterPresent) {
-            mSensorManager.registerListener(this, mStepCounter,
-                    SensorManager.SENSOR_DELAY_FASTEST);
-        }
+
         if (isSensorStepDetectorPresent) {
             mSensorManager.registerListener(this, mStepDetector,
                     SensorManager.SENSOR_DELAY_FASTEST);
@@ -581,10 +560,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             mSensorManager.registerListener(this, mRotationVector,
                     SensorManager.SENSOR_DELAY_UI);
         }
-        if (isSensorLinearAccelerationPresent) {
-            mSensorManager.registerListener(this, mLinearAccelerometer,
-                    SensorManager.SENSOR_DELAY_UI);
+
+                if (isSensorStepCounterPresent) {
+            mSensorManager.registerListener(this, mStepCounter,
+                    SensorManager.SENSOR_DELAY_FASTEST);
         }
+
+//        if (isSensorLinearAccelerationPresent) {
+//            mSensorManager.registerListener(this, mLinearAccelerometer,
+//                    SensorManager.SENSOR_DELAY_UI);
+//        }
     }
 
     @Override
